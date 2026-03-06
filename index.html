@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koordináta Célbalövő</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f0f4f8; margin: 0; padding: 20px; }
+        #game-container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 15px; shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        canvas { border: 2px solid #333; background: white; width: 100%; max-width: 300px; touch-action: none; }
+        .target { color: #e63946; font-size: 1.5rem; font-weight: bold; margin: 10px 0; }
+        button { background: #457b9d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h2>Koordináta Célbalövő</h2>
+        <p>Találd el a pontot!</p>
+        <div class="target" id="target-text">Cél: (?, ?)</div>
+        <canvas id="gridCanvas" width="300" height="300"></canvas>
+        <p id="feedback"></p>
+        <button onclick="nextLevel()">Új játék</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+        const targetText = document.getElementById('target-text');
+        const feedback = document.getElementById('feedback');
+        let targetX, targetY;
+        const scale = 15; // 1 egység = 15 pixel
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#ddd';
+            for(let i=0; i<=300; i+=scale) {
+                ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,300); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(300,i); ctx.stroke();
+            }
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(150,0); ctx.lineTo(150,300); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0,150); ctx.lineTo(300,150); ctx.stroke();
+        }
+
+        function nextLevel() {
+            targetX = Math.floor(Math.random() * 11) - 5;
+            targetY = Math.floor(Math.random() * 11) - 5;
+            targetText.innerText = `Cél: (${targetX}; ${targetY})`;
+            feedback.innerText = "";
+            drawGrid();
+        }
+
+        canvas.addEventListener('click', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const clickX = Math.round((x - 150) / scale);
+            const clickY = Math.round((150 - y) / scale);
+
+            if(clickX === targetX && clickY === targetY) {
+                feedback.innerHTML = "<b style='color:green'>Talált! 🎉</b>";
+                ctx.fillStyle = "green";
+                ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2); ctx.fill();
+            } else {
+                feedback.innerHTML = `<span style='color:red'>Nem talált. Te ide kattintottál: (${clickX}; ${clickY})</span>`;
+            }
+        });
+
+        nextLevel();
+    </script>
+</body>
+</html>
